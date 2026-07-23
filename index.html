@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+
+<html lang="id">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Rayon Wonorejo v7.17 FULL</title>
+
+<script src="https://cdn.tailwindcss.com"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<style>
+
+  body { font-family: 'Inter', sans-serif; }
+
+ .hidden { display: none; }
+
+  th,td { padding:8px; border-bottom:1px solid #eee; text-align:left; }
+
+</style>
+
+</head>
+
+<body class="bg-gray-100">
+
+
+
+<!-- LOGIN -->
+
+<div id="loginPage" class="min-h-screen flex items-center justify-center">
+
+  <div class="bg-white p-8 rounded-2xl shadow-lg w-96">
+
+    <h1 class="text-2xl font-bold text-center mb-6">Login Rayon Wonorejo</h1>
+
+    <input id="username" type="text" placeholder="Username" class="w-full p-3 border rounded-lg mb-4">
+
+    <input id="password" type="password" placeholder="Password" class="w-full p-3 border rounded-lg mb-4">
+
+    <button onclick="doLogin()" class="w-full bg-blue-600 text-white p-3 rounded-lg font-bold hover:bg-blue-700">Login</button>
+
+    <p id="loginError" class="text-red-500 text-sm mt-3 text-center hidden">Username/Password salah</p>
+
+  </div>
+
+</div>
+
+
+
+<!-- MAIN APP -->
+
+<div id="mainApp" class="hidden p-4 max-w-7xl mx-auto">
+
+  <div class="flex justify-between items-center mb-4">
+
+    <h1 class="text-2xl font-bold">Dashboard Rayon Wonorejo</h1>
+
+    <div>Halo, <b id="userNow"></b> <span id="roleNow" class="text-sm bg-gray-200 px-2 rounded"></span>
+
+    <button onclick="logout()" class="bg-red-500 text-white px-4 py-2 rounded-lg ml-3">Logout</button></div>
+
+  </div>
+
+
+
+  <!-- MENU -->
+
+  <div class="flex gap-4 mb-6">
+
+    <button onclick="showTab('dashboard')" class="bg-orange-600 text-white px-4 py-2 rounded-lg">Dashboard</button>
+
+    <button onclick="showTab('keuangan')" class="bg-green-600 text-white px-4 py-2 rounded-lg">Keuangan</button>
+
+    <button onclick="showTab('siswa')" class="bg-purple-600 text-white px-4 py-2 rounded-lg">Data Siswa</button>
+
+  </div>
+
+
+
+  <!-- DASHBOARD -->
+
+  <div id="tabDashboard">
+
+    <div class="grid grid-cols-3 gap-4 mb-4">
+
+      <div class="bg-white p-4 rounded shadow"><p class="text-gray-500">Total Masuk</p><h2 id="totalMasuk" class="text-2xl font-bold text-green-600">Rp 0</h2></div>
+
+      <div class="bg-white p-4 rounded shadow"><p class="text-gray-500">Total Keluar</p><h2 id="totalKeluar" class="text-2xl font-bold text-red-600">Rp 0</h2></div>
+
+      <div class="bg-white p-4 rounded shadow"><p class="text-gray-500">Saldo</p><h2 id="totalSaldo" class="text-2xl font-bold text-blue-600">Rp 0</h2></div>
+
+    </div>
+
+    <div class="bg-white p-4 rounded shadow"><canvas id="grafikKeu"></canvas></div>
+
+  </div>
+
+
+
+  <!-- KEUANGAN -->
+
+  <div id="tabKeuangan" class="hidden">
+
+    <div class="flex justify-between mb-3">
+
+      <h2 class="text-xl font-bold">Data Keuangan</h2>
+
+      <button onclick="exportExcel('keuangan')" class="bg-green-500 text-white px-3 py-1 rounded">Export Excel</button>
+
+    </div>
+
+    <div class="bg-white p-4 rounded-lg shadow mb-4 grid-cols-2 md:grid-cols-5 gap-3">
+
+      <input id="tgl" type="date" class="border p-2 rounded">
+
+      <input id="ket" placeholder="Keterangan" class="border p-2 rounded">
+
+      <input id="namaKeu" placeholder="Nama" class="border p-2 rounded">
+
+      <select id="kegiatan" class="border p-2 rounded"><option>Lain-lain</option><option>Iuran</option><option>Kegiatan</option></select>
+
+      <input id="jumlah" type="number" placeholder="Jumlah" class="border p-2 rounded">
+
+      <select id="tipe" class="border p-2 rounded"><option>Masuk</option><option>Keluar</option></select>
+
+      <select id="filterBulan" class="border p-2 rounded" onchange="renderKeu()"><option value="">Semua Bulan</option></select>
+
+      <button onclick="simpanKeu()" id="btnSimpanKeu" class="bg-blue-600 text-white p-2 rounded col-span-2">Simpan</button>
+
+    </div>
+
+    <div id="listKeu" class="bg-white p-4 rounded-lg shadow overflow-x-auto"></div>
+
+  </div>
+
+
+
+  <!-- SISWA -->
+
+  <div id="tabSiswa" class="hidden">
+
+    <div class="flex justify-between mb-3">
+
+      <h2 class="text-xl font-bold">Data Siswa</h2>
+
+      <button onclick="exportExcel('siswa')" class="bg-green-500 text-white px-3 py-1 rounded">Export Excel</button>
+
+    </div>
+
+    <div class="bg-white p-4 rounded-lg shadow mb-4 grid grid-cols-2 md:grid-cols-3 gap-3">
+
+      <input id="namaSis" placeholder="Nama" class="border p-2 rounded">
+
+      <input id="tingkatan" placeholder="Tingkatan" class="border p-2 rounded">
+
+      <input id="agama" placeholder="Agama" class="border p-2 rounded">
+
+      <input id="nik" placeholder="NIK" class="border p-2 rounded">
+
+      <input id="hp" placeholder="No HP" class="border p-2 rounded">
+
+      <input id="bb" placeholder="BB" class="border p-2 rounded">
+
+      <input id="alamat" placeholder="Alamat" class="border p-2 rounded">
+
+      <input id="leting" placeholder="Leting" class="border p-2 rounded">
+
+      <button onclick="simpanSiswa()" id="btnSimpanSis" class="bg-blue-600 text-white p-2 rounded col-span-3">Simpan</button>
+
+    </div>
+
+    <div id="listSiswa" class="bg-white p-4 rounded-lg shadow overflow-x-auto"></div>
+
+  </div>
+
+</div>
+
+
+
+<script>
+
+const URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbyNOnIVAkZNVLlqGSu1RIdr61DzlFfcqj7t-IVdwL6g8wRJ25gxbfadLG70MAFNDMpMQw/exec';
+
+let currentUser = '', currentRole = '', editIndex = null, editType = '';
+
+let dataKeu = [], dataSiswa = [], chart;
+
+
+
+function doLogin(){
+
+  let u = document.getElementById('username').value;
+
+  let p = document.getElementById('password').value;
+
+  fetch(URL_SCRIPT + '?action=login&u='+u+'&p='+p).then(r=>r.json()).then(res=>{
+
+    if(res.status == 'sukses'){
+
+      currentUser = res.username; currentRole = res.role;
+
+      document.getElementById('userNow').innerText = currentUser;
+
+      document.getElementById('roleNow').innerText = currentRole;
+
+      document.getElementById('loginPage').classList.add('hidden');
+
+      document.getElementById('mainApp').classList.remove('hidden');
+
+      if(currentRole!= 'admin'){ document.getElementById('btnSimpanKeu').disabled=true; document.getElementById('btnSimpanSis').disabled=true; }
+
+      loadData();
+
+    } else { document.getElementById('loginError').classList.remove('hidden'); }
+
+  });
+
+}
+
+
+
+function logout(){ location.reload(); }
+
+function showTab(tab){
+
+  ['tabDashboard','tabKeuangan','tabSiswa'].forEach(id=>document.getElementById(id).classList.add('hidden'));
+
+  document.getElementById('tab'+tab.charAt(0).toUpperCase()+tab.slice(1)).classList.remove('hidden');
+
+}
+
+
+
+async function loadData(){
+
+  let res = await fetch(URL_SCRIPT);
+
+  let data = await res.json();
+
+  dataKeu = data.keuangan; dataSiswa = data.siswa;
+
+  renderKeu(); renderSiswa(); renderDashboard();
+
+}
+
+
+
+function renderDashboard(){
+
+  let masuk = dataKeu.filter(r=>r.tipe=='Masuk').reduce((a,b)=>a+Number(b.jumlah),0);
+
+  let keluar = dataKeu.filter(r=>r.tipe=='Keluar').reduce((a,b)=>a+Number(b.jumlah),0);
+
+  document.getElementById('totalMasuk').innerText = 'Rp '+masuk.toLocaleString();
+
+  document.getElementById('totalKeluar').innerText = 'Rp '+keluar.toLocaleString();
+
+  document.getElementById('totalSaldo').innerText = 'Rp '+(masuk-keluar).toLocaleString();
+
+
+
+  if(chart) chart.destroy();
+
+  chart = new Chart(document.getElementById('grafikKeu'), {
+
+    type:'bar', data:{ labels:['Masuk','Keluar'], datasets:[{data:[masuk,keluar], backgroundColor:['green','red']}] }
+
+  });
+
+}
+
+
+
+function renderKeu(){
+
+  let html = '<table class="w-full text-sm"><tr><th>Tgl</th><th>Keterangan</th><th>Nama</th><th>Kegiatan</th><th>Jumlah</th><th>Tipe</th><th>Aksi</th></tr>';
+
+  dataKeu.forEach((r,i)=>{
+
+    html += `<tr><td>${r.tanggal}</td><td>${r.ket}</td><td>${r.nama}</td><td>${r.kegiatan}</td><td>${r.jumlah}</td><td>${r.tipe}</td>
+
+    <td>${currentRole=='admin'?`<button onclick="editKeu(${i})" class="text-blue-500">Edit</button> <button onclick="hapusKeu(${i})" class="text-red-500">Hapus</button>`:''}</td></tr>`;
+
+  });
+
+  html += '</table>'; document.getElementById('listKeu').innerHTML = html;
+
+}
+
+
+
+function renderSiswa(){
+
+  let html = '<table class="w-full text-sm"><tr><th>Nama</th><th>Tingkatan</th><th>Agama</th><th>NIK</th><th>HP</th><th>Aksi</th></tr>';
+
+  dataSiswa.forEach((r,i)=>{
+
+    html += `<tr><td>${r.nama}</td><td>${r.tingkatan}</td><td>${r.agama}</td><td>${r.nik}</td><td>${r.hp}</td>
+
+    <td>${currentRole=='admin'?`<button onclick="editSis(${i})" class="text-blue-500">Edit</button> <button onclick="hapusSis(${i})" class="text-red-500">Hapus</button>`:''}</td></tr>`;
+
+  });
+
+  html += '</table>'; document.getElementById('listSiswa').innerHTML = html;
+
+}
+
+
+
+async function simpanKeu(){
+
+  let payload = {action: editType=='keu'?'edit_keu':'tambah_keu', row:editIndex, tanggal: tgl.value, ket: ket.value, nama: namaKeu.value, kegiatan: kegiatan.value, jumlah: jumlah.value, tipe: tipe.value, user: currentUser};
+
+  await fetch(URL_SCRIPT, {method:'POST', body: JSON.stringify(payload)});
+
+  alert('Tersimpan'); editIndex=null; editType=''; loadData();
+
+}
+
+
+
+async function hapusKeu(i){ if(confirm('Hapus?')){ await fetch(URL_SCRIPT, {method:'POST', body: JSON.stringify({action:'hapus_keu', row:i})}); loadData(); } }
+
+function editKeu(i){ editIndex=i; editType='keu'; let r=dataKeu[i]; tgl.value=r.tanggal; ket.value=r.ket; namaKeu.value=r.nama; kegiatan.value=r.kegiatan; jumlah.value=r.jumlah; tipe.value=r.tipe; }
+
+
+
+async function simpanSiswa(){
+
+  let payload = {action: editType=='sis'?'edit_siswa':'tambah_siswa', row:editIndex, nama: namaSis.value, tingkatan: tingkatan.value, agama: agama.value, nik: nik.value, hp: hp.value, bb: bb.value, alamat: alamat.value, leting: leting.value, user: currentUser};
+
+  await fetch(URL_SCRIPT, {method:'POST', body: JSON.stringify(payload)});
+
+  alert('Tersimpan'); editIndex=null; editType=''; loadData();
+
+}
+
+
+
+async function hapusSis(i){ if(confirm('Hapus?')){ await fetch(URL_SCRIPT, {method:'POST', body: JSON.stringify({action:'hapus_siswa', row:i})}); loadData(); } }
+
+function editSis(i){ editIndex=i; editType='sis'; let r=dataSiswa[i]; namaSis.value=r.nama; tingkatan.value=r.tingkatan; agama.value=r.agama; nik.value=r.nik; hp.value=r.hp; bb.value=r.bb; alamat.value=r.alamat; leting.value=r.leting; }
+
+
+
+function exportExcel(type){
+
+  let data = type=='keuangan'?dataKeu:dataSiswa;
+
+  let ws = XLSX.utils.json_to_sheet(data);
+
+  let wb = XLSX.utils.book_new();
+
+  XLSX.utils.book_append_sheet(wb, ws, type);
+
+  XLSX.writeFile(wb, type+".xlsx");
+
+}
+
+</script>
+
+</body>
+
+</html>
