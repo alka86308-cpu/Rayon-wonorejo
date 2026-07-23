@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+
+<html lang="id">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Rayon Wonorejo</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+    *{margin:0;padding:0;box-sizing:border-box}
+
+    body{font-family:'Poppins',sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh}
+
+ .login-container{height:100vh;display:flex;justify-content:center;align-items:center;padding:20px}
+
+ .login-box{background:rgba(255,255,255,0.95);padding:40px;border-radius:20px;width:100%;max-width:400px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);backdrop-filter:blur(10px)}
+
+    h1{color:#8b5cf6;margin-bottom:10px;font-size:28px;font-weight:700}
+
+    input{width:100%;padding:14px;margin:10px 0;border:2px solid #e5e7eb;border-radius:12px;font-size:16px;font-family:'Poppins'}
+
+    button{width:100%;padding:14px;background:linear-gradient(90deg,#8b5cf6,#ec4899);border:none;border-radius:12px;color:#fff;font-size:18px;font-weight:600;cursor:pointer;margin-top:10px;transition:0.3s}
+
+    button:hover{transform:translateY(-2px);box-shadow:0 10px 20px rgba(139,92,246,0.4)}
+
+
+
+ .dashboard{display:none;padding:20px;max-width:1200px;margin:0 auto}
+
+ .navbar{background:rgba(255,255,255,0.95);padding:20px 25px;border-radius:15px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 10px 30px rgba(0,0,0,0.1)}
+
+ .card{background:rgba(255,255,255,0.95);padding:25px;border-radius:15px;box-shadow:0 10px 30px rgba(0,0,0,0.1);margin-bottom:20px}
+
+   .card h3{color:#8b5cf6;margin-bottom:15px;font-size:20px}
+
+    table{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px}
+
+    th,td{padding:12px;border-bottom:1px solid #e5e7eb;text-align:left}
+
+    th{background:#f3f4f6;font-weight:600}
+
+   .logout-btn{background:#ef4444;width:auto;padding:10px 20px}
+
+</style>
+
+</head>
+
+<body>
+
+
+
+<div class="login-container" id="loginPage">
+
+    <div class="login-box">
+
+        <h1>Rayon Wonorejo</h1>
+
+        <p style="color:#6b7280;margin-bottom:20px">Sistem Informasi Rayon</p>
+
+        <input type="text" id="username" placeholder="Username" value="ketua">
+
+        <input type="password" id="password" placeholder="Password" value="123">
+
+        <button onclick="login()">Login</button>
+
+    </div>
+
+</div>
+
+
+
+<div class="dashboard" id="dashboardPage">
+
+    <div class="navbar">
+
+        <h2 style="color:#8b5cf6">Rayon Wonorejo</h2>
+
+        <button class="logout-btn" onclick="logout()">Logout</button>
+
+    </div>
+
+    <div class="card">
+
+        <h3 id="welcome">Selamat Datang</h3>
+
+    </div>
+
+    <div class="card">
+
+        <h3>📊 Data Siswa</h3>
+
+        <div id="dataSiswa">Loading data...</div>
+
+    </div>
+
+    <div class="card">
+
+        <h3>💰 Data Keuangan</h3>
+
+        <div id="dataKeuangan">Loading data...</div>
+
+    </div>
+
+</div>
+
+
+
+<script>
+
+    const URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbyNOnIVAkZNVLlqGSu1RIdr61DzlFfcqj7t-IVdwL6g8wRJ25gxbfadLG70MAFNDMpMQw/exec';
+
+    let currentUser = null;
+
+
+
+    function login() {
+
+        const u = document.getElementById('username').value;
+
+        const p = document.getElementById('password').value;
+
+        const callbackName = 'cb' + Date.now();
+
+        window[callbackName] = function(data) {
+
+            if(data.status == 'sukses') {
+
+                currentUser = data;
+
+                document.getElementById('loginPage').style.display = 'none';
+
+                document.getElementById('dashboardPage').style.display = 'block';
+
+                document.getElementById('welcome').innerText = `Halo ${data.username} 👋 | Role: ${data.role}`;
+
+                loadData();
+
+            } else { alert('Username atau Password salah'); }
+
+            document.head.removeChild(script); delete window[callbackName];
+
+        }
+
+        const script = document.createElement('script');
+
+        script.src = `${URL_SCRIPT}?action=login&u=${u}&p=${p}&callback=${callbackName}`;
+
+        document.head.appendChild(script);
+
+    }
+
+
+
+    function logout(){
+
+        document.getElementById('loginPage').style.display = 'flex';
+
+        document.getElementById('dashboardPage').style.display = 'none';
+
+    }
+
+
+
+    function loadData(){
+
+        // Load Siswa
+
+        const cb1 = 'cbSiswa' + Date.now();
+
+        window[cb1] = function(data){
+
+            if(data.length==0){document.getElementById('dataSiswa').innerHTML='Belum ada data';return;}
+
+            let html = '<table><tr><th>No</th><th>Nama</th><th>Kelas</th></tr>';
+
+            data.forEach((row,i) => html += `<tr><td>${i+1}</td><td>${row.nama}</td><td>${row.kelas}</td></tr>`);
+
+            document.getElementById('dataSiswa').innerHTML = html+'</table>';
+
+        }
+
+        let s1 = document.createElement('script');
+
+        s1.src = `${URL_SCRIPT}?action=getSiswa&callback=${cb1}`;
+
+        document.head.appendChild(s1);
+
+
+
+        // Load Keuangan
+
+        const cb2 = 'cbKeu' + Date.now();
+
+        window[cb2] = function(data){
+
+            if(data.length==0){document.getElementById('dataKeuangan').innerHTML='Belum ada data';return;}
+
+            let html = '<table><tr><th>Tanggal</th><th>Keterangan</th><th>Jumlah</th></tr>';
+
+            data.forEach(row => html += `<tr><td>${row.tanggal}</td><td>${row.keterangan}</td><td>Rp ${row.jumlah}</td></tr>`);
+
+            document.getElementById('dataKeuangan').innerHTML = html+'</table>';
+
+        }
+
+        let s2 = document.createElement('script');
+
+        s2.src = `${URL_SCRIPT}?action=getKeuangan&callback=${cb2}`;
+
+        document.head.appendChild(s2);
+
+    }
+
+</script>
+
+</body>
+
+</html>
