@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+
+<html lang="id">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Login - Rayon Wonorejo</title>
+
+<style>
+
+    *{margin:0;padding:0;box-sizing:border-box}
+
+    body{
+
+        background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+
+        height:100vh;display:flex;justify-content:center;align-items:center;
+
+        font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+    }
+
+  .login-box{
+
+        background:#fff;padding:40px;border-radius:20px;width:90%;max-width:400px;
+
+        text-align:center;box-shadow:0 20px 40px rgba(0,0,0,0.2);
+
+    }
+
+    h1{color:#8b5cf6;margin-bottom:10px;font-size:28px}
+
+    p{color:#6b7280;margin-bottom:25px}
+
+    input{
+
+        width:100%;padding:14px;margin:10px 0;border:2px solid #e5e7eb;
+
+        border-radius:10px;font-size:16px;transition:0.3s;
+
+    }
+
+    input:focus{border-color:#8b5cf6;outline:none}
+
+    button{
+
+        width:100%;padding:14px;background:linear-gradient(90deg,#8b5cf6,#ec4899);
+
+        border:none;border-radius:10px;color:#fff;font-size:18px;font-weight:bold;
+
+        cursor:pointer;margin-top:10px;transition:0.3s;
+
+    }
+
+    button:hover{transform:translateY(-2px);opacity:0.9}
+
+   .info{margin-top:20px;font-size:12px;color:#9ca3af}
+
+</style>
+
+</head>
+
+<body>
+
+    <div class="login-box">
+
+        <h1>Rayon Wonorejo</h1>
+
+        <p>Silahkan Login</p>
+
+        <input type="text" id="username" placeholder="Username" value="ketua">
+
+        <input type="password" id="password" placeholder="Password" value="123">
+
+        <button onclick="login()">Login</button>
+
+        <div class="info">User: ketua | Pass: 123</div>
+
+    </div>
+
+
+
+<script>
+
+    const URL_SCRIPT = 'https://script.google.com/macros/s/AKfycbyNOnIVAkZNVLlqGSu1RIdr61DzlFfcqj7t-IVdwL6g8wRJ25gxbfadLG70MAFNDMpMQw/exec';
+
+    
+
+    function login() {
+
+        const u = document.getElementById('username').value;
+
+        const p = document.getElementById('password').value;
+
+        const callbackName = 'cb' + Date.now();
+
+        
+
+        window[callbackName] = function(data) {
+
+            if(data.status == 'sukses') {
+
+                localStorage.setItem('user', JSON.stringify(data));
+
+                window.location.href = 'dashboard.html';
+
+            } else { 
+
+                alert('Username atau Password salah'); 
+
+            }
+
+            document.head.removeChild(script);
+
+            delete window[callbackName];
+
+        }
+
+        
+
+        const script = document.createElement('script');
+
+        script.src = `${URL_SCRIPT}?action=login&u=${encodeURIComponent(u)}&p=${encodeURIComponent(p)}&callback=${callbackName}`;
+
+        document.head.appendChild(script);
+
+    }
+
+    
+
+    // Enter buat login
+
+    document.getElementById('password').addEventListener('keypress', function(e){
+
+        if(e.key === 'Enter') login();
+
+    })
+
+</script>
+
+</body>
+
+</html>
